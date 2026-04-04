@@ -101,7 +101,7 @@ class _ReviewScreenState extends State<ReviewScreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppTheme.bgLight, Colors.white],
+            colors: [AppTheme.warmWhite, Colors.white],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -464,7 +464,7 @@ class _ReviewScreenState extends State<ReviewScreen>
                   accuracy >= 70
                       ? AppTheme.mintGreen.withValues(alpha: 0.1)
                       : AppTheme.coral.withValues(alpha: 0.1),
-                  AppTheme.bgLight,
+                  AppTheme.warmWhite,
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,

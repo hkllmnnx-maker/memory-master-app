@@ -4,9 +4,11 @@ import '../providers/memory_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/icon_helper.dart';
 import '../services/spaced_repetition_service.dart';
+import '../data/quran_data.dart';
 import 'add_item_screen.dart';
 import 'review_screen.dart';
 import 'category_items_screen.dart';
+import 'quran/surah_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,44 +19,38 @@ class HomeScreen extends StatelessWidget {
       builder: (context, provider, _) {
         return CustomScrollView(
           slivers: [
-            // الهيدر المتدرج
             SliverToBoxAdapter(child: _buildHeader(context, provider)),
-            // بطاقة الحالة السريعة
             SliverToBoxAdapter(child: _buildQuickStats(context, provider)),
-            // زر المراجعة السريعة
             if (provider.dueCount > 0)
               SliverToBoxAdapter(child: _buildReviewBanner(context, provider)),
-            // عنوان الفئات
+            SliverToBoxAdapter(child: _buildQuranQuickAccess(context)),
             const SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 24, 20, 12),
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
                 child: Text(
                   'التصنيفات',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textDark,
                   ),
                 ),
               ),
             ),
-            // شبكة الفئات
             SliverToBoxAdapter(child: _buildCategoriesGrid(context, provider)),
-            // آخر المحفوظات
             const SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 24, 20, 12),
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
                 child: Text(
                   'آخر المحفوظات',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textDark,
                   ),
                 ),
               ),
             ),
-            // قائمة المحفوظات الأخيرة
             _buildRecentItems(context, provider),
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
@@ -65,12 +61,12 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, MemoryProvider provider) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 56, 20, 24),
       decoration: const BoxDecoration(
         gradient: AppTheme.headerGradient,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(28),
         ),
       ),
       child: Column(
@@ -82,47 +78,54 @@ class HomeScreen extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'مرحباً بك! 👋',
+                  Text(
+                    'السلام عليكم',
                     style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
+                      fontSize: 14,
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'ذاكرة الحفظ',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [AppTheme.primaryGold, AppTheme.lightGold],
+                    ).createShader(bounds),
+                    child: const Text(
+                      'ذاكرة الحفظ',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
               ),
-              // شارة السلسلة
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  color: AppTheme.primaryGold.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AppTheme.primaryGold.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Text('🔥', style: TextStyle(fontSize: 20)),
+                    const Icon(Icons.local_fire_department_rounded, color: AppTheme.primaryGold, size: 20),
                     const SizedBox(width: 6),
                     Text(
                       '${provider.streak}',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.primaryGold,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Text(
+                    Text(
                       'يوم',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                      style: TextStyle(color: AppTheme.primaryGold.withValues(alpha: 0.7), fontSize: 11),
                     ),
                   ],
                 ),
@@ -130,25 +133,33 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // نصيحة اليوم
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
             ),
             child: Row(
               children: [
-                const Text('💡', style: TextStyle(fontSize: 20)),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryGold.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.lightbulb_outline, color: AppTheme.primaryGold, size: 18),
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     SpacedRepetitionService.getMemorizationTip(
                       provider.items.isEmpty ? 0 : provider.items.first.repetitionLevel,
                     ),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 12,
+                      height: 1.4,
                     ),
                   ),
                 ),
@@ -162,29 +173,14 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildQuickStats(BuildContext context, MemoryProvider provider) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
       child: Row(
         children: [
-          _buildStatCard(
-            'إجمالي المحفوظات',
-            '${provider.totalItems}',
-            Icons.library_books_rounded,
-            AppTheme.teal,
-          ),
-          const SizedBox(width: 12),
-          _buildStatCard(
-            'تحتاج مراجعة',
-            '${provider.dueCount}',
-            Icons.alarm_rounded,
-            AppTheme.coral,
-          ),
-          const SizedBox(width: 12),
-          _buildStatCard(
-            'تم إتقانها',
-            '${provider.masteredCount}',
-            Icons.emoji_events_rounded,
-            AppTheme.golden,
-          ),
+          _buildStatCard('المحفوظات', '${provider.totalItems}', Icons.library_books_rounded, AppTheme.deepTeal),
+          const SizedBox(width: 10),
+          _buildStatCard('تحتاج مراجعة', '${provider.dueCount}', Icons.alarm_rounded, AppTheme.coral),
+          const SizedBox(width: 10),
+          _buildStatCard('تم إتقانها', '${provider.masteredCount}', Icons.emoji_events_rounded, AppTheme.primaryGold),
         ],
       ),
     );
@@ -196,10 +192,10 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.15),
+              color: color.withValues(alpha: 0.08),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -210,16 +206,16 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(height: 8),
             Text(
               value,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
@@ -227,10 +223,7 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 10,
-                color: AppTheme.textGrey,
-              ),
+              style: const TextStyle(fontSize: 10, color: AppTheme.textGrey),
               textAlign: TextAlign.center,
             ),
           ],
@@ -241,73 +234,55 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildReviewBanner(BuildContext context, MemoryProvider provider) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: InkWell(
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => ReviewScreen(items: provider.dueItems),
-            ),
+            MaterialPageRoute(builder: (_) => ReviewScreen(items: provider.dueItems)),
           );
         },
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: AppTheme.tealGradient,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.teal.withValues(alpha: 0.3),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+                color: AppTheme.deepTeal.withValues(alpha: 0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(14),
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.play_circle_filled_rounded,
-                  color: Colors.white,
-                  size: 32,
-                ),
+                child: const Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: 28),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'ابدأ المراجعة الآن!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      'ابدأ المراجعة الآن',
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 4),
                     Text(
                       'لديك ${provider.dueCount} محفوظات تحتاج مراجعة',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
                     ),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
+              const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
             ],
           ),
         ),
@@ -315,9 +290,111 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildQuranQuickAccess(BuildContext context) {
+    final quickSurahs = [
+      QuranData.surahs[0],  // الفاتحة
+      QuranData.surahs[35], // يس
+      QuranData.surahs[54], // الرحمن
+      QuranData.surahs[66], // الملك
+      QuranData.surahs[17], // الكهف
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryGold.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.menu_book_rounded, size: 16, color: AppTheme.primaryGold),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'سور مختارة',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textDark),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 100,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: quickSurahs.length,
+              itemBuilder: (context, index) {
+                final surah = quickSurahs[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => SurahDetailScreen(surah: surah)),
+                    );
+                  },
+                  child: Container(
+                    width: 110,
+                    margin: const EdgeInsets.only(left: 10),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.deepNavy.withValues(alpha: 0.9),
+                          AppTheme.deepTeal.withValues(alpha: 0.7),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${surah.number}',
+                          style: const TextStyle(
+                            color: AppTheme.primaryGold,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          surah.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${surah.versesCount} آية',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCategoriesGrid(BuildContext context, MemoryProvider provider) {
     return SizedBox(
-      height: 120,
+      height: 110,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -327,48 +404,33 @@ class HomeScreen extends StatelessWidget {
             return _buildAddCategoryCard(context);
           }
           final cat = provider.categories[index];
-          final count = provider.items
-              .where((i) => i.category == cat.id)
-              .length;
-          final color = AppTheme.categoryColors[
-              cat.colorIndex % AppTheme.categoryColors.length];
+          final count = provider.items.where((i) => i.category == cat.id).length;
+          final color = AppTheme.categoryColors[cat.colorIndex % AppTheme.categoryColors.length];
 
           return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => CategoryItemsScreen(category: cat),
-                ),
+                MaterialPageRoute(builder: (_) => CategoryItemsScreen(category: cat)),
               );
             },
             child: Container(
-              width: 110,
-              margin: const EdgeInsets.only(left: 12),
-              padding: const EdgeInsets.all(14),
+              width: 105,
+              margin: const EdgeInsets.only(left: 10),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.2),
-                ),
+                color: color.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: color.withValues(alpha: 0.15)),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    IconHelper.getIcon(cat.icon),
-                    color: color,
-                    size: 30,
-                  ),
+                  Icon(IconHelper.getIcon(cat.icon), color: color, size: 26),
                   const SizedBox(height: 8),
                   Text(
                     cat.name,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                    ),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -376,10 +438,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '$count محفوظ',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: color.withValues(alpha: 0.7),
-                    ),
+                    style: TextStyle(fontSize: 9, color: color.withValues(alpha: 0.6)),
                   ),
                 ],
               ),
@@ -394,29 +453,20 @@ class HomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showAddCategoryDialog(context),
       child: Container(
-        width: 110,
-        margin: const EdgeInsets.only(left: 12),
-        padding: const EdgeInsets.all(14),
+        width: 105,
+        margin: const EdgeInsets.only(left: 10),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.grey.shade300,
-            style: BorderStyle.solid,
-          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.grey.shade300),
         ),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_circle_outline, color: AppTheme.textGrey, size: 30),
+            Icon(Icons.add_circle_outline, color: AppTheme.textGrey, size: 26),
             SizedBox(height: 8),
-            Text(
-              'إضافة فئة',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppTheme.textGrey,
-              ),
-            ),
+            Text('إضافة فئة', style: TextStyle(fontSize: 11, color: AppTheme.textGrey)),
           ],
         ),
       ),
@@ -435,30 +485,29 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.all(40),
             child: Column(
               children: [
-                const Text('📝', style: TextStyle(fontSize: 60)),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppTheme.cream,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.edit_note_rounded, size: 40, color: AppTheme.deepTeal),
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'لا توجد محفوظات بعد',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textDark,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textDark),
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'اضغط + لإضافة أول محفوظ لك',
-                  style: TextStyle(
-                    color: AppTheme.textGrey,
-                  ),
+                  'ابدأ بحفظ القرآن أو أضف محفوظاً جديداً',
+                  style: TextStyle(color: AppTheme.textGrey, fontSize: 13),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const AddItemScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AddItemScreen()));
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('إضافة محفوظ'),
@@ -474,108 +523,68 @@ class HomeScreen extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final item = display[index];
-          final color = AppTheme.categoryColors[
-              item.colorIndex % AppTheme.categoryColors.length];
-          final cat = provider.categories
-              .where((c) => c.id == item.category)
-              .firstOrNull;
+          final color = AppTheme.categoryColors[item.colorIndex % AppTheme.categoryColors.length];
+          final cat = provider.categories.where((c) => c.id == item.category).firstOrNull;
 
           return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               leading: Container(
-                width: 50,
-                height: 50,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [color, color.withValues(alpha: 0.7)],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
+                  gradient: LinearGradient(colors: [color, color.withValues(alpha: 0.7)]),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Text(
                     item.title.characters.first,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
               title: Text(
                 item.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               ),
               subtitle: Row(
                 children: [
+                  Text(cat?.name ?? 'عام', style: TextStyle(fontSize: 11, color: color)),
+                  const SizedBox(width: 6),
                   Text(
-                    cat?.name ?? 'عام',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: color,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '• ${item.masteryLevelText}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppTheme.textGrey,
-                    ),
+                    '${item.masteryLevelText}',
+                    style: const TextStyle(fontSize: 11, color: AppTheme.textGrey),
                   ),
                 ],
               ),
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (item.isDueForReview)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
+              trailing: item.isDueForReview
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
                         color: AppTheme.coral.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
                         'مراجعة',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppTheme.coral,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontSize: 10, color: AppTheme.coral, fontWeight: FontWeight.bold),
                       ),
                     )
-                  else
-                    Text(
+                  : Text(
                       SpacedRepetitionService.getNextReviewText(item),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppTheme.textGrey,
-                      ),
+                      style: const TextStyle(fontSize: 10, color: AppTheme.textGrey),
                     ),
-                ],
-              ),
             ),
           );
         },
@@ -592,110 +601,83 @@ class HomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text(
-            'إضافة تصنيف جديد',
-            style: TextStyle(fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController,
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
-                  decoration: const InputDecoration(
-                    hintText: 'اسم التصنيف',
-                    prefixIcon: Icon(Icons.category),
+        builder: (ctx, setDialogState) => Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('إضافة تصنيف جديد', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    decoration: const InputDecoration(hintText: 'اسم التصنيف', prefixIcon: Icon(Icons.category)),
                   ),
-                ),
-                const SizedBox(height: 16),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('اختر أيقونة:', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: IconHelper.availableIcons.map((ic) {
-                    final isSelected = selectedIcon == ic['name'];
-                    return GestureDetector(
-                      onTap: () {
-                        setDialogState(() => selectedIcon = ic['name'] as String);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppTheme.coral.withValues(alpha: 0.15)
-                              : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10),
-                          border: isSelected
-                              ? Border.all(color: AppTheme.coral, width: 2)
-                              : null,
+                  const SizedBox(height: 16),
+                  const Align(alignment: Alignment.centerRight, child: Text('اختر أيقونة:', style: TextStyle(fontWeight: FontWeight.bold))),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: IconHelper.availableIcons.map((ic) {
+                      final isSelected = selectedIcon == ic['name'];
+                      return GestureDetector(
+                        onTap: () => setDialogState(() => selectedIcon = ic['name'] as String),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? AppTheme.deepTeal.withValues(alpha: 0.15) : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(10),
+                            border: isSelected ? Border.all(color: AppTheme.deepTeal, width: 2) : null,
+                          ),
+                          child: Icon(ic['icon'] as IconData, color: isSelected ? AppTheme.deepTeal : AppTheme.textGrey, size: 24),
                         ),
-                        child: Icon(
-                          ic['icon'] as IconData,
-                          color: isSelected ? AppTheme.coral : AppTheme.textGrey,
-                          size: 24,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('اختر لوناً:', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: List.generate(
-                    AppTheme.categoryColors.length,
-                    (i) => GestureDetector(
-                      onTap: () {
-                        setDialogState(() => selectedColorIndex = i);
-                      },
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: AppTheme.categoryColors[i],
-                          shape: BoxShape.circle,
-                          border: selectedColorIndex == i
-                              ? Border.all(color: Colors.black54, width: 3)
-                              : null,
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  const Align(alignment: Alignment.centerRight, child: Text('اختر لوناً:', style: TextStyle(fontWeight: FontWeight.bold))),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: List.generate(
+                      AppTheme.categoryColors.length,
+                      (i) => GestureDetector(
+                        onTap: () => setDialogState(() => selectedColorIndex = i),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: AppTheme.categoryColors[i],
+                            shape: BoxShape.circle,
+                            border: selectedColorIndex == i ? Border.all(color: Colors.black54, width: 3) : null,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.trim().isNotEmpty) {
+                    context.read<MemoryProvider>().addCategory(
+                      name: nameController.text.trim(),
+                      icon: selectedIcon,
+                      colorIndex: selectedColorIndex,
+                    );
+                    Navigator.pop(ctx);
+                  }
+                },
+                child: const Text('إضافة'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('إلغاء'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.trim().isNotEmpty) {
-                  context.read<MemoryProvider>().addCategory(
-                    name: nameController.text.trim(),
-                    icon: selectedIcon,
-                    colorIndex: selectedColorIndex,
-                  );
-                  Navigator.pop(ctx);
-                }
-              },
-              child: const Text('إضافة'),
-            ),
-          ],
         ),
       ),
     );
