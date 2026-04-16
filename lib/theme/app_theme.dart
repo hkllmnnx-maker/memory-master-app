@@ -31,6 +31,15 @@ class AppTheme {
   static const Color skyBlue = Color(0xFF74B9FF);
   static const Color pinkAccent = Color(0xFFE84393);
 
+  // Dark palette
+  static const Color darkBg = Color(0xFF0F1419);
+  static const Color darkSurface = Color(0xFF1A2332);
+  static const Color darkCardBg = Color(0xFF1F2A3A);
+  static const Color darkDivider = Color(0xFF2A3A4F);
+  static const Color darkTextPrimary = Color(0xFFE8ECF4);
+  static const Color darkTextSecondary = Color(0xFFA6B0C2);
+  static const Color darkTextMuted = Color(0xFF6E7A8F);
+
   // Gradients
   static const LinearGradient islamicGradient = LinearGradient(
     colors: [deepNavy, Color(0xFF1B3A4B)],
@@ -74,6 +83,12 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
+  static const LinearGradient emeraldGradient = LinearGradient(
+    colors: [emerald, softEmerald],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   static const List<Color> categoryColors = [
     deepTeal,
     primaryGold,
@@ -85,11 +100,17 @@ class AppTheme {
     skyBlue,
   ];
 
-  static ThemeData get lightTheme {
+  static ThemeData get lightTheme => _buildLight(deepTeal);
+  static ThemeData get darkTheme => _buildDark(deepTeal);
+
+  static ThemeData buildLightWithColor(Color seed) => _buildLight(seed);
+  static ThemeData buildDarkWithColor(Color seed) => _buildDark(seed);
+
+  static ThemeData _buildLight(Color seed) {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorSchemeSeed: deepTeal,
+      colorSchemeSeed: seed,
       scaffoldBackgroundColor: warmWhite,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -112,10 +133,10 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: deepTeal,
+          backgroundColor: seed,
           foregroundColor: Colors.white,
           elevation: 3,
-          shadowColor: deepTeal.withValues(alpha: 0.3),
+          shadowColor: seed.withValues(alpha: 0.3),
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -133,11 +154,12 @@ class AppTheme {
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
-        selectedItemColor: deepTeal,
+        selectedItemColor: seed,
         unselectedItemColor: textLight,
         type: BottomNavigationBarType.fixed,
         elevation: 12,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        selectedLabelStyle:
+            const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -148,15 +170,99 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: deepTeal, width: 2),
+          borderSide: BorderSide(color: seed, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       ),
       dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
       ),
+    );
+  }
+
+  static ThemeData _buildDark(Color seed) {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorSchemeSeed: seed,
+      scaffoldBackgroundColor: darkBg,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          color: darkTextPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        iconTheme: IconThemeData(color: darkTextPrimary),
+      ),
+      cardTheme: CardThemeData(
+        color: darkCardBg,
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: seed,
+          foregroundColor: Colors.white,
+          elevation: 3,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primaryGold,
+        foregroundColor: Colors.white,
+        elevation: 6,
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: darkSurface,
+        selectedItemColor: primaryGold,
+        unselectedItemColor: darkTextMuted,
+        type: BottomNavigationBarType.fixed,
+        elevation: 12,
+        selectedLabelStyle:
+            TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkCardBg,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: seed, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        hintStyle: const TextStyle(color: darkTextMuted),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: darkCardBg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+      ),
+      textTheme: const TextTheme().apply(
+        bodyColor: darkTextPrimary,
+        displayColor: darkTextPrimary,
+      ),
+      dividerColor: darkDivider,
     );
   }
 }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
 import 'all_items_screen.dart';
-import 'stats_screen.dart';
 import 'add_item_screen.dart';
 import 'quran/quran_main_screen.dart';
+import 'tools/tools_hub_screen.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -20,21 +20,22 @@ class _MainWrapperState extends State<MainWrapper> {
     HomeScreen(),
     QuranMainScreen(),
     AllItemsScreen(),
-    StatsScreen(),
+    ToolsHubScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        body: _screens[_currentIndex],
+        body: IndexedStack(index: _currentIndex, children: _screens),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? AppTheme.darkSurface : Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
                 blurRadius: 20,
                 offset: const Offset(0, -4),
               ),
@@ -46,11 +47,15 @@ class _MainWrapperState extends State<MainWrapper> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, 'الرئيسية'),
-                  _buildNavItem(1, Icons.menu_book_rounded, Icons.menu_book_outlined, 'المصحف'),
+                  _buildNavItem(0, Icons.home_rounded, Icons.home_outlined,
+                      'الرئيسية', isDark),
+                  _buildNavItem(1, Icons.menu_book_rounded,
+                      Icons.menu_book_outlined, 'المصحف', isDark),
                   _buildAddButton(),
-                  _buildNavItem(2, Icons.library_books_rounded, Icons.library_books_outlined, 'محفوظاتي'),
-                  _buildNavItem(3, Icons.bar_chart_rounded, Icons.bar_chart_outlined, 'إحصائيات'),
+                  _buildNavItem(2, Icons.library_books_rounded,
+                      Icons.library_books_outlined, 'محفوظاتي', isDark),
+                  _buildNavItem(
+                      3, Icons.apps_rounded, Icons.apps_outlined, 'الأدوات', isDark),
                 ],
               ),
             ),
@@ -60,8 +65,11 @@ class _MainWrapperState extends State<MainWrapper> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData activeIcon, IconData icon, String label) {
+  Widget _buildNavItem(
+      int index, IconData activeIcon, IconData icon, String label, bool isDark) {
     final isActive = _currentIndex == index;
+    final activeColor = Theme.of(context).colorScheme.primary;
+    final inactiveColor = isDark ? AppTheme.darkTextMuted : AppTheme.textLight;
 
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
@@ -69,7 +77,9 @@ class _MainWrapperState extends State<MainWrapper> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppTheme.deepTeal.withValues(alpha: 0.1) : Colors.transparent,
+          color: isActive
+              ? activeColor.withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -77,7 +87,7 @@ class _MainWrapperState extends State<MainWrapper> {
           children: [
             Icon(
               isActive ? activeIcon : icon,
-              color: isActive ? AppTheme.deepTeal : AppTheme.textLight,
+              color: isActive ? activeColor : inactiveColor,
               size: 22,
             ),
             const SizedBox(height: 2),
@@ -86,7 +96,7 @@ class _MainWrapperState extends State<MainWrapper> {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                color: isActive ? AppTheme.deepTeal : AppTheme.textLight,
+                color: isActive ? activeColor : inactiveColor,
               ),
             ),
           ],

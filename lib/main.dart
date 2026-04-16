@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/storage_service.dart';
 import 'providers/memory_provider.dart';
+import 'providers/settings_provider.dart';
 import 'screens/main_wrapper.dart';
 import 'theme/app_theme.dart';
 
@@ -9,22 +10,46 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StorageService.init();
 
-  runApp(const MemoryMasterApp());
+  // Initialize settings provider (reads from Hive)
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.init();
+
+  runApp(MemoryMasterApp(settingsProvider: settingsProvider));
 }
 
 class MemoryMasterApp extends StatelessWidget {
-  const MemoryMasterApp({super.key});
+  final SettingsProvider settingsProvider;
+  const MemoryMasterApp({super.key, required this.settingsProvider});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => MemoryProvider()..loadData(),
-      child: MaterialApp(
-        title: 'ذاكرة الحفظ',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        locale: const Locale('ar', 'SA'),
-        home: const SplashScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MemoryProvider()..loadData()),
+        ChangeNotifierProvider.value(value: settingsProvider),
+      ],
+      child: Consumer<SettingsProvider>(
+        builder: (context, settings, _) {
+          final seed = (SettingsProvider.availablePrimaryColors[
+                  settings.primaryColorIndex]['color'] as Color);
+          return MaterialApp(
+            title: 'ذاكرة الحفظ',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.buildLightWithColor(seed),
+            darkTheme: AppTheme.buildDarkWithColor(seed),
+            themeMode: settings.themeMode,
+            locale: const Locale('ar', 'SA'),
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(settings.fontScale),
+                ),
+                child: child ?? const SizedBox.shrink(),
+              );
+            },
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }
@@ -157,13 +182,15 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.primaryGold.withValues(alpha: 0.15),
+                                    color: AppTheme.primaryGold
+                                        .withValues(alpha: 0.15),
                                     blurRadius: 30,
                                     offset: const Offset(0, 10),
                                   ),
                                 ],
                                 border: Border.all(
-                                  color: AppTheme.primaryGold.withValues(alpha: 0.3),
+                                  color: AppTheme.primaryGold
+                                      .withValues(alpha: 0.3),
                                   width: 1.5,
                                 ),
                               ),
@@ -178,7 +205,10 @@ class _SplashScreenState extends State<SplashScreen>
                             const SizedBox(height: 24),
                             ShaderMask(
                               shaderCallback: (bounds) => const LinearGradient(
-                                colors: [AppTheme.primaryGold, AppTheme.lightGold],
+                                colors: [
+                                  AppTheme.primaryGold,
+                                  AppTheme.lightGold
+                                ],
                               ).createShader(bounds),
                               child: const Text(
                                 'ذاكرة الحفظ',
