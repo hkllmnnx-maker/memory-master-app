@@ -11,6 +11,7 @@ import 'review_screen.dart';
 import 'category_items_screen.dart';
 import 'quran/surah_detail_screen.dart';
 import 'tools/daily_wisdom_screen.dart';
+import 'tools/azkar_shortcut.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -28,6 +29,7 @@ class HomeScreen extends StatelessWidget {
             if (provider.dueCount > 0)
               SliverToBoxAdapter(child: _buildReviewBanner(context, provider)),
             SliverToBoxAdapter(child: _buildQuranQuickAccess(context)),
+            const SliverToBoxAdapter(child: AzkarShortcutRow()),
             SliverToBoxAdapter(child: _buildDailyWisdomCard(context)),
             SliverToBoxAdapter(
               child: Padding(
@@ -193,47 +195,54 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildStatCard(String label, String value, IconData icon, Color color) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+      child: Builder(builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.darkCardBg : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: isDark ? 0.15 : 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
+            ],
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 20),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 10, color: AppTheme.textGrey),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                    fontSize: 10,
+                    color: isDark
+                        ? AppTheme.darkTextSecondary
+                        : AppTheme.textGrey),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -404,23 +413,32 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryGold.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
+          Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryGold.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.menu_book_rounded,
+                      size: 16, color: AppTheme.primaryGold),
                 ),
-                child: const Icon(Icons.menu_book_rounded, size: 16, color: AppTheme.primaryGold),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'سور مختارة',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textDark),
-              ),
-            ],
-          ),
+                const SizedBox(width: 8),
+                Text(
+                  'سور مختارة',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppTheme.darkTextPrimary
+                          : AppTheme.textDark),
+                ),
+              ],
+            );
+          }),
           const SizedBox(height: 12),
           SizedBox(
             height: 100,
