@@ -5,10 +5,12 @@ import '../theme/app_theme.dart';
 import '../utils/icon_helper.dart';
 import '../services/spaced_repetition_service.dart';
 import '../data/quran_data.dart';
+import '../data/daily_wisdom_data.dart';
 import 'add_item_screen.dart';
 import 'review_screen.dart';
 import 'category_items_screen.dart';
 import 'quran/surah_detail_screen.dart';
+import 'tools/daily_wisdom_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -26,6 +28,7 @@ class HomeScreen extends StatelessWidget {
             if (provider.dueCount > 0)
               SliverToBoxAdapter(child: _buildReviewBanner(context, provider)),
             SliverToBoxAdapter(child: _buildQuranQuickAccess(context)),
+            SliverToBoxAdapter(child: _buildDailyWisdomCard(context)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
@@ -285,6 +288,101 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDailyWisdomCard(BuildContext context) {
+    final wisdom = DailyWisdomData.getDailyVerse();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const DailyWisdomScreen()),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.primaryGold.withValues(alpha: isDark ? 0.18 : 0.12),
+                AppTheme.deepTeal.withValues(alpha: isDark ? 0.22 : 0.08),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: AppTheme.primaryGold.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.goldGradient,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.menu_book_rounded,
+                        color: Colors.white, size: 16),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'آية اليوم',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppTheme.lightGold : AppTheme.darkGold,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(Icons.arrow_forward_ios_rounded,
+                      size: 12,
+                      color: isDark
+                          ? AppTheme.darkTextMuted
+                          : AppTheme.textGrey),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                wisdom.text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 17,
+                  height: 2.0,
+                  fontFamily: 'Amiri',
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? AppTheme.darkTextPrimary
+                      : AppTheme.textDark,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    wisdom.source,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textGrey,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
