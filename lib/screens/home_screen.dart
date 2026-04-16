@@ -15,6 +15,8 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? AppTheme.darkTextPrimary : AppTheme.textDark;
     return Consumer<MemoryProvider>(
       builder: (context, provider, _) {
         return CustomScrollView(
@@ -24,29 +26,29 @@ class HomeScreen extends StatelessWidget {
             if (provider.dueCount > 0)
               SliverToBoxAdapter(child: _buildReviewBanner(context, provider)),
             SliverToBoxAdapter(child: _buildQuranQuickAccess(context)),
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                 child: Text(
                   'التصنيفات',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textDark,
+                    color: titleColor,
                   ),
                 ),
               ),
             ),
             SliverToBoxAdapter(child: _buildCategoriesGrid(context, provider)),
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                 child: Text(
                   'آخر المحفوظات',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textDark,
+                    color: titleColor,
                   ),
                 ),
               ),
@@ -450,6 +452,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildAddCategoryCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => _showAddCategoryDialog(context),
       child: Container(
@@ -457,16 +460,24 @@ class HomeScreen extends StatelessWidget {
         margin: const EdgeInsets.only(left: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: isDark ? AppTheme.darkCardBg : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+              color: isDark ? AppTheme.darkDivider : Colors.grey.shade300),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_circle_outline, color: AppTheme.textGrey, size: 26),
-            SizedBox(height: 8),
-            Text('إضافة فئة', style: TextStyle(fontSize: 11, color: AppTheme.textGrey)),
+            Icon(Icons.add_circle_outline,
+                color: isDark ? AppTheme.darkTextMuted : AppTheme.textGrey,
+                size: 26),
+            const SizedBox(height: 8),
+            Text('إضافة فئة',
+                style: TextStyle(
+                    fontSize: 11,
+                    color: isDark
+                        ? AppTheme.darkTextMuted
+                        : AppTheme.textGrey)),
           ],
         ),
       ),
@@ -479,6 +490,7 @@ class HomeScreen extends StatelessWidget {
     final display = recent.take(5).toList();
 
     if (display.isEmpty) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return SliverList(
         delegate: SliverChildListDelegate([
           Padding(
@@ -489,20 +501,30 @@ class HomeScreen extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppTheme.cream,
+                    color: isDark ? AppTheme.darkCardBg : AppTheme.cream,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.edit_note_rounded, size: 40, color: AppTheme.deepTeal),
+                  child: const Icon(Icons.edit_note_rounded,
+                      size: 40, color: AppTheme.deepTeal),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'لا توجد محفوظات بعد',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textDark),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark
+                          ? AppTheme.darkTextPrimary
+                          : AppTheme.textDark),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'ابدأ بحفظ القرآن أو أضف محفوظاً جديداً',
-                  style: TextStyle(color: AppTheme.textGrey, fontSize: 13),
+                  style: TextStyle(
+                      color: isDark
+                          ? AppTheme.darkTextSecondary
+                          : AppTheme.textGrey,
+                      fontSize: 13),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
@@ -526,14 +548,15 @@ class HomeScreen extends StatelessWidget {
           final color = AppTheme.categoryColors[item.colorIndex % AppTheme.categoryColors.length];
           final cat = provider.categories.where((c) => c.id == item.category).firstOrNull;
 
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           return Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? AppTheme.darkCardBg : Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -557,15 +580,24 @@ class HomeScreen extends StatelessWidget {
               ),
               title: Text(
                 item.title,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: isDark ? AppTheme.darkTextPrimary : AppTheme.textDark,
+                ),
               ),
               subtitle: Row(
                 children: [
-                  Text(cat?.name ?? 'عام', style: TextStyle(fontSize: 11, color: color)),
+                  Text(cat?.name ?? 'عام',
+                      style: TextStyle(fontSize: 11, color: color)),
                   const SizedBox(width: 6),
                   Text(
-                    '${item.masteryLevelText}',
-                    style: const TextStyle(fontSize: 11, color: AppTheme.textGrey),
+                    item.masteryLevelText,
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? AppTheme.darkTextSecondary
+                            : AppTheme.textGrey),
                   ),
                 ],
               ),
