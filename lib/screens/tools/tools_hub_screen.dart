@@ -4,6 +4,9 @@ import '../azkar/azkar_list_screen.dart';
 import 'tasbih_screen.dart';
 import 'hifz_timer_screen.dart';
 import 'achievements_screen.dart';
+import 'asma_ul_husna_screen.dart';
+import 'daily_wisdom_screen.dart';
+import 'challenges_screen.dart';
 import '../settings/settings_screen.dart';
 
 /// شاشة الأدوات - تجمع كل الأدوات الإسلامية والمساعدة
@@ -16,6 +19,15 @@ class ToolsHubScreen extends StatelessWidget {
 
     final tools = [
       _ToolData(
+        title: 'تذكرة اليوم',
+        subtitle: 'آية وحديث ودعاء يومياً',
+        icon: Icons.lightbulb_rounded,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFD4A853), Color(0xFFE8C97A)],
+        ),
+        target: const DailyWisdomScreen(),
+      ),
+      _ToolData(
         title: 'حصن المسلم',
         subtitle: 'أذكار الصباح والمساء والنوم',
         icon: Icons.auto_awesome_rounded,
@@ -23,6 +35,15 @@ class ToolsHubScreen extends StatelessWidget {
           colors: [Color(0xFF0D6E6E), Color(0xFF148F8F)],
         ),
         target: const AzkarListScreen(),
+      ),
+      _ToolData(
+        title: 'الأسماء الحسنى',
+        subtitle: '99 اسماً لله تعالى مع شرحها',
+        icon: Icons.star_rounded,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE84393), Color(0xFFFF7AB6)],
+        ),
+        target: const AsmaUlHusnaScreen(),
       ),
       _ToolData(
         title: 'السبحة الإلكترونية',
@@ -35,12 +56,21 @@ class ToolsHubScreen extends StatelessWidget {
       ),
       _ToolData(
         title: 'مؤقت الحفظ',
-        subtitle: 'جلسات تركيز علمية للحفظ',
+        subtitle: 'جلسات تركيز للحفظ والمراجعة',
         icon: Icons.timer_rounded,
         gradient: const LinearGradient(
-          colors: [Color(0xFFD4A853), Color(0xFFB8860B)],
+          colors: [Color(0xFFFF9F43), Color(0xFFFFB872)],
         ),
         target: const HifzTimerScreen(),
+      ),
+      _ToolData(
+        title: 'التحديات',
+        subtitle: 'أهدافك اليومية والأسبوعية',
+        icon: Icons.flag_rounded,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE74C3C), Color(0xFFEC7063)],
+        ),
+        target: const ChallengesScreen(),
       ),
       _ToolData(
         title: 'الإنجازات',
@@ -74,12 +104,11 @@ class ToolsHubScreen extends StatelessWidget {
               automaticallyImplyLeading: false,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  decoration:
-                      const BoxDecoration(gradient: AppTheme.headerGradient),
+                  decoration: const BoxDecoration(
+                      gradient: AppTheme.headerGradient),
                   child: SafeArea(
                     child: Padding(
-                      padding:
-                          const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                       child: Row(
                         children: [
                           Container(
