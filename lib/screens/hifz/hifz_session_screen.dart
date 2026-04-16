@@ -36,6 +36,7 @@ class _HifzSessionScreenState extends State<HifzSessionScreen>
   int _totalAttempts = 0;
   bool _showAnswer = false;
   double _hidePercentage = 0.0;
+  // ignore: unused_field
   late DateTime _startTime;
   Timer? _timer;
   int _elapsedSeconds = 0;

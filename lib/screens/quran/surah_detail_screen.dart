@@ -507,7 +507,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen> {
       title: 'سورة ${widget.surah.name}',
       content: 'حفظ سورة ${widget.surah.name} - ${widget.surah.versesCount} آية - ${widget.surah.revelationType}',
       category: 'quran',
-      hints: ['سورة رقم ${widget.surah.number}', '${widget.surah.revelationType}', 'الجزء ${widget.surah.juz}'],
+      hints: ['سورة رقم ${widget.surah.number}', widget.surah.revelationType, 'الجزء ${widget.surah.juz}'],
       colorIndex: 1,
     );
 

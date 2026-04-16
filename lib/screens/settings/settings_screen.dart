@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/memory_provider.dart';
+import '../../services/backup_service.dart';
 import '../../theme/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -84,6 +87,30 @@ class SettingsScreen extends StatelessWidget {
                     value: settings.soundEnabled,
                     onChanged: settings.setSoundEnabled,
                   ),
+                ),
+                const SizedBox(height: 24),
+
+                // Backup
+                _sectionTitle('النسخ الاحتياطي', Icons.backup_rounded, isDark),
+                const SizedBox(height: 10),
+                _tile(
+                  context: context,
+                  isDark: isDark,
+                  icon: Icons.file_upload_rounded,
+                  color: AppTheme.emerald,
+                  title: 'تصدير البيانات',
+                  subtitle: 'حفظ نسخة من محفوظاتك',
+                  onTap: () => _exportData(context),
+                ),
+                const SizedBox(height: 10),
+                _tile(
+                  context: context,
+                  isDark: isDark,
+                  icon: Icons.file_download_rounded,
+                  color: AppTheme.skyBlue,
+                  title: 'استيراد البيانات',
+                  subtitle: 'استعادة بيانات من نسخة سابقة',
+                  onTap: () => _importData(context),
                 ),
                 const SizedBox(height: 24),
 
@@ -382,6 +409,175 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (v) => settings.setDailyGoal(v.toInt()),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _exportData(BuildContext context) async {
+    final data = BackupService.exportData();
+    if (!context.mounted) return;
+    await showDialog(
+      context: context,
+      builder: (_) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('تصدير البيانات',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.emerald.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle_rounded,
+                        color: AppTheme.emerald),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'تم تجهيز بيانات بحجم ${(data.length / 1024).toStringAsFixed(1)} كيلوبايت',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'انسخ البيانات التالية واحفظها في مكان آمن',
+                style: TextStyle(fontSize: 12),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 150),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.darkBg
+                      : AppTheme.cream,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: SingleChildScrollView(
+                  child: SelectableText(
+                    data.length > 500
+                        ? '${data.substring(0, 500)}...\n\n[${data.length - 500} حرف إضافي]'
+                        : data,
+                    style: const TextStyle(
+                        fontSize: 10, fontFamily: 'monospace'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('إغلاق'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: data));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('تم نسخ البيانات إلى الحافظة'),
+                    backgroundColor: AppTheme.emerald,
+                  ),
+                );
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.copy_rounded),
+              label: const Text('نسخ'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _importData(BuildContext context) async {
+    final controller = TextEditingController();
+    if (!context.mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('استيراد البيانات',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.warmOrange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.warning_rounded, color: AppTheme.warmOrange),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'الاستيراد سيضيف البيانات إلى ما هو موجود حالياً',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: controller,
+                maxLines: 6,
+                decoration: const InputDecoration(
+                  hintText: 'ألصق بيانات التصدير هنا...',
+                  border: OutlineInputBorder(),
+                ),
+                style: const TextStyle(
+                    fontSize: 12, fontFamily: 'monospace'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (controller.text.trim().isEmpty) return;
+                Navigator.pop(ctx);
+                final result =
+                    await BackupService.importData(controller.text);
+                if (!context.mounted) return;
+                if (result.success) {
+                  context.read<MemoryProvider>().loadData();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                          'تم استيراد ${result.itemsCount} محفوظ و ${result.categoriesCount} تصنيف'),
+                      backgroundColor: AppTheme.emerald,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(result.error ?? 'فشل استيراد البيانات'),
+                      backgroundColor: AppTheme.coral,
+                    ),
+                  );
+                }
+              },
+              child: const Text('استيراد'),
+            ),
+          ],
+        ),
       ),
     );
   }
