@@ -7,6 +7,8 @@ import 'achievements_screen.dart';
 import 'asma_ul_husna_screen.dart';
 import 'daily_wisdom_screen.dart';
 import 'challenges_screen.dart';
+import 'hifz_tips_screen.dart';
+import 'quick_quiz_screen.dart';
 import '../settings/settings_screen.dart';
 
 /// شاشة الأدوات - تجمع كل الأدوات الإسلامية والمساعدة
@@ -62,6 +64,24 @@ class ToolsHubScreen extends StatelessWidget {
           colors: [Color(0xFFFF9F43), Color(0xFFFFB872)],
         ),
         target: const HifzTimerScreen(),
+      ),
+      _ToolData(
+        title: 'مسابقة الحفظ',
+        subtitle: 'اختبر نفسك في محفوظاتك',
+        icon: Icons.quiz_rounded,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF00B894), Color(0xFF00A385)],
+        ),
+        target: const QuickQuizScreen(),
+      ),
+      _ToolData(
+        title: 'نصائح الحفظ',
+        subtitle: '15 نصيحة ذهبية للحفظ المتقن',
+        icon: Icons.tips_and_updates_rounded,
+        gradient: const LinearGradient(
+          colors: [Color(0xFF74B9FF), Color(0xFF3498DB)],
+        ),
+        target: const HifzTipsScreen(),
       ),
       _ToolData(
         title: 'التحديات',
